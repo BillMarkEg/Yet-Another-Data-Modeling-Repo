@@ -54,15 +54,18 @@
 <br> should write bd_ingestion_ts to track last touched ETL 
 <br> store all natural keys of source systems + add sur key + other attributes to dim and trx to fact
 <br>  SCD wizard in ssis ETL tool is item(drag/drop) to make SCD easier 
+### Loading Dim tables
 #### incremental load data into dim table in ssis scd (all in Dims) using Microsfor SCD Wizard tool 
 <br> SCD (fixed attribute change) : if row changed so data goes to different table. <not common scenario> so main table didnt change
 <br> SCD (inferred member) : late arriving data so fact can't match it in dim as not yet came                   
 <br> SCD (changing attribute ) :SCD type 1  (may there is historical data so if apply to history option is active will update all hist rows to last version)
 <br> SCD (historical attribute ) :SCD type 2 (need to show who is last row using A: start n end date B:status flag isACtive) so last date will be null means active 
-#### dealing with infered (late arrived dim rows)
+#### Late arriving Dim == infered dim
+when natural key in fact finds no map in dim so there is many options (3rd one in module 5 is best)
+<br> create incremental sur key and save natural key in dim and in temp table then if come late will he updated else its as is in dim.
 <br> when we select from fact and no mapping key in dim so it will be created with 2 options
 <br> 1: is to create it with all null columns 
-<br> 2: to add one more column to say if infered/not to avoid selecting nulls 
+<br> 2: to add one more column to say if infered/not in dimention tab.
 <br> when this infered come it will update that row BTW we can create this all in SCD wizard : check demo in module 3
 <br> wizard didnt detect deletion in source system.
 #### ALTERNATIVE TO WIZARD
@@ -75,43 +78,44 @@
 <br> when not matched by source -> row in target but not in source 
 <br> check example in module 03 demo merge setul .txt <truncate stage then load data into it then merge <update if exist,insert if not>> TYPE 1 SCD exmple
 <br> **NOTE SCD is not on table level but column level so name-> type1 if change will overwrite row / status may be type 2 so if change we add new row **
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<br> we need separate merge querey to handle each type of SCD
+#### temporal table as Dimentions talbles : keep history of deleted or updated data in original table and can query table back n time.
+<br> TYPE 1 SCD : will store the overwritten data to historical table , also can help in type 2 by moving cold data to historical version of it.
+<br> we can use it also to join with fact table using valide from & valide to : to get all historical rows from histocal table of it. 
+<br> cons -> don't support late coming data. 
+<br> cons -> it keep whole record not custom columns so if we make some col as tyoe 1 and other as type 2 the historical tab will grow so fast.
+<br> cons -> keep timestamp of db so if validity is based on trx time this will not be tracked in case of archiving to historical table 
+#### why we need stage table in T-sql option
+<br> as in spark we do transformations in rdd/dataframe here its a database so need a table to make transformations in before loading data into new table.
+### Loading fact tables
+#### loading fact notes
+<br> fact fks should'nt be nulls or add default value then 
+<br> better to add bd_ingestion_ts for better troubleshoting
+<br> last ETL identifier flag.
+#### grouping/value band 
+<br> used for quering specific group of customer so we join with dim using upper/lower bound join eg. where fact.price > dim.lowe and fact.price < dim.upper 
+<br> to optimize --> make a key for each group and join with it instead of using upper/lower bound and add them as features instead.
+#### transformations on fact
+<br> non-blocking -> like wide trans on spark eg.lookup tasks , calc age from bd and so on that dont need all sources to calc dest.
+<br> semi-blovking -> don't need all sources like non-blocking but needs buffer in dist. to write eg.merge,merge join,pivot and union all 
+<br> blocking -> narrow in spark eg. aggregations and order .. etc
+#### reKeying 
+<br> process where we load all Dims in ETL process to map natureal key with sur key  NOting that :: 
+<br> type 1 SCD : just there is one row of sur with nat
+<br> type 2 : need to select secific values with end time is null to get current active or define specific ts to get time period wanted.
+<br> Verbose <in Python too>  used for regex extraction and logging and it has lib in ssis too.
+#### ETL time bottleneck catching
+<br> 1-check distination : replace writing with count action (called multicast)
+<br> 2-check transformations : just dont make any trnasformations
+<br> if there is still issue so its the source itself.
+<br> u may need to filter type 2 SCD dim before joining
+<br> cash all lkps(DIMs)
+<br> drop index before insert and reADD after insertion is Done.
+<br> increate buffer that ssis uses for transofrmations and loading data -> audto adjust buffer like dynamic allocation in spark
+<br> reduce num of rows being processed -> incremental load only changes. (come next module.)
+<br> distibute ur data --> mod(10) and each taks filter on specifc num 1-9
+<br> why can't do full cash in ssis -> may be u'r adding/removing rows in the same pipeline.
+<br> 
 <br>
 <br>
 <br>
