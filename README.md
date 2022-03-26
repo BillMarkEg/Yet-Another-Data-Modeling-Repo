@@ -156,12 +156,25 @@ when natural key in fact finds no map in dim so there is many options (3rd one i
 <br> CDC can't track new column automatically but CT can DO
 <br> CT can't handle more than 15M change per day but CDC is stable.
 #### big dive into CDC 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<br> configrations: 
+<br> role_name -> roles that can make changes to CDC if null -> anyone can
+<br> capture instance -> name of change data table if not specified will get it from source name 
+<br> support net changes -> 1 means can keep changes in one record 
+<br> captured-col-list -> list of cols u wanna track changes on it. if null -> track all
+<br> file group -> make CDC on specific file group
+<br> then it create CDC table with some meta data columns :
+<br> LSN -> squence num of change transaction 
+<br> sql val -> order changes in same transaction (same LSN)
+<br> operation -> oepration type (2)insert | (3)update with value before  | (4 )updat with value after | (1) delete
+<br> update mask -> which columns changed 
+<br> command id -> inc key of change.
+<br> so when CDC work there is 2 jobs running  1-CDC ||  2-to clean up old  changes that is out of retention policy we define. (default automated at 2am)
+<br> Transactional replication is a SQL Server technology that used to replicate changes between two databases. include database objects like tables..more. 
+<br> we CAN'T apply both CDC and  Transactional replication on same db if then log reader agent will handle the situation.
+<br> para of quering cdc table <all dont get old value before update to get --> all_update_old> 
+<br> if net changes shows only last dml ( no old update/deletes or even insert that updated)
+<br> in CDC first incremental load after historical load will be dedicated to data changes during historical load.
+<br> CDC -> historical -> intial load , end intial load 
+<br> CDC -> inc -> get cdc key then set it at the end.
+<br> 
 <br>
