@@ -26,6 +26,36 @@
 <br> in Dim we add some indicatorflags eg. isActive , isLast and so on to make quering data easier 
 <br> star schema  productDim(productCategoryName as attribute) 
 <br> snowflake productDim - productCategoryDim(normalized from productDim (product_id , productCategory)
+
+## Dimentinal modeling Microsfot SQl server 
+#### bbar vs set-based sql inserts/updates
+<br>  why sur key ? as bus key may change overtime + fastjoins + differnt tables in souce system so we need one key 
+<br> Set-based programming is based upon the mathematical concept of a set, and has operators that work on a whole set at a time. Procedural (RBAR) programming is 
+<br>  based more  on the traditional computer concepts of files and records. So to increase the salary of all employees in department X by 10%:
+<br> Set-based:
+<br> UPDATE employees SET salary = salary * 1.10 WHERE department = 'X';
+<br> Procedural (extreme example, pseudo-code):
+<br> 
+<br> OPEN cursor FOR SELECT * FROM employees;
+<br> LOOP
+<br>    FETCH cursor INTO record;
+<br>    EXIT WHEN (no more records to fetch);
+<br>    IF record.department = 'X' THEN
+<br>       UPDATE employees
+<br>       SET    salary = salary * 1.10
+<br>       WHERE  employee_id = record.employee_id;
+<br>    END IF
+<br> END LOOP
+<br> CLOSE cursor;
+<br> In the procedural version, only one employee row is being updated at a time; in the set-based version, all rows in the "set of employees in department X" are upda <br> ted at once (as far as we are concerned).
+<br> Not sure this adds anything to what you will have already read in your links, but I thought I'd have a shot at it!
+#### Data Quality Architecture
+<br> if ETL failed -> record log in elastic (which step failed + error) then record status of etl (failde/sucess)
+<br> should write bd_ingestion_ts to track last touched ETL 
+<br> store all natural keys of source systems + add sur key + other attributes to dim and trx to fact
+#### incremental load data into dim table in ssis scd (all in Dims) using Microsfor SCD Wizard tool 
+<br> SCD (fixed attribute change) : if row changed so data goes to different table. <not common scenario>
+<br> SCD (inferred member) : late arriving data so fact can't match it in dim as not yet came                   
 <br> 
 <br>
 <br>
@@ -88,14 +118,7 @@
 <br>
 <br>
 <br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+br>
 <br>
 <br>
 <br>
