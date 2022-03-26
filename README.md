@@ -117,6 +117,14 @@ when natural key in fact finds no map in dim so there is many options (3rd one i
 <br> why can't do full cash in ssis -> may be u'r adding/removing rows in the same pipeline.
 
 ### Exploring incremental ETL
+
+### defalt architecture to build
+<br> load data into stage table that truncate at start before loading it (except in option3 next) 
+<br> if runType pata is hist-> load full data option || if inc -> so we just inc changes
+<br> if hist-> just select * from source to stage  then merge to fact table & need to drop index then reBuild after load
+<br> if inc -> so differ from option to another check each one's quereis and procedure 
+<br> load data into fact table
+<br> update Etl ExtractionKeys lkp that track if Etl succeeded/Not.  
 ### option 1 : using trigger
 
 <br> make trigger that before any dml in source table take it and add to trigger table that track all changes and its type with change id 
@@ -142,12 +150,12 @@ when natural key in fact finds no map in dim so there is many options (3rd one i
 <br> to avoid RBAR load and bulk load data at once.
 #### note  : where processing of transformation happens
 <br> in buffer memory and cors we set in configrations of ssis
-
-<br>
-<br>
-<br>
-<br>
-<br>
+#### CDC vs CT <options 4 & 5 build in by microsfot sql server db>
+<br> CDC is Async so it dont add overload on source system dml || it also record all changee before and after update with all columun before and after 
+<br> CT is Sync but lightweight || keep only new data. || tell only pk that has been changed not column itself.
+<br> CDC can't track new column automatically but CT can DO
+<br> CT can't handle more than 15M change per day but CDC is stable.
+#### big dive into CDC 
 <br>
 <br>
 <br>
