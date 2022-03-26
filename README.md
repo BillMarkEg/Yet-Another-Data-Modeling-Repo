@@ -115,16 +115,34 @@ when natural key in fact finds no map in dim so there is many options (3rd one i
 <br> reduce num of rows being processed -> incremental load only changes. (come next module.)
 <br> distibute ur data --> mod(10) and each taks filter on specifc num 1-9
 <br> why can't do full cash in ssis -> may be u'r adding/removing rows in the same pipeline.
-<br> 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-br>
-<br>
+
+### Exploring incremental ETL
+### option 1 : using trigger
+
+<br> make trigger that before any dml in source table take it and add to trigger table that track all changes and its type with change id 
+<br> then there is another table that stores last etl and last change id processed 
+<br> when there is new change it check last id processed and take all new changes in trigger table then load it to fact table 
+<br> check quereies of procedure in module data.
+  
+### option 2 : using timestamp
+
+<br> instead of using change_id we use ts to know new changed data and keep track of it 
+<br> when u update anythin in source must update last mod date column too in both source and fact
+<br> this approach can't track deleted rows so need extrac way to handle it.
+  
+### option 3 : using full diff & hashing  
+
+<br> a stage table for tracking all source data + hashed column for all row. + col that track if source need no change = 0 , need change = 1 , need delete = 2 
+<br> note stage table here is not truncated each time as before options <1,2> it stores data from last ETL
+<br> another view on source table + hashed column for all row
+<br> then we join both together to get update col that trach changes <in stage table> if row not fount in view set to 2 , if changeed set to 1 , nochange set to 0
+<br> then we take data need changes and merge with fact table then delete change col =2 and update 1 to 0 again for comming ETLs
+
+#### note  : why do we need stage table each time we process data
+<br> to avoid RBAR load and bulk load data at once.
+#### note  : where processing of transformation happens
+<br> in buffer memory and cors we set in configrations of ssis
+
 <br>
 <br>
 <br>
