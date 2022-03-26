@@ -53,27 +53,28 @@
 <br> if ETL failed -> record log in elastic (which step failed + error) then record status of etl (failde/sucess)
 <br> should write bd_ingestion_ts to track last touched ETL 
 <br> store all natural keys of source systems + add sur key + other attributes to dim and trx to fact
+<br>  SCD wizard in ssis ETL tool is item(drag/drop) to make SCD easier 
 #### incremental load data into dim table in ssis scd (all in Dims) using Microsfor SCD Wizard tool 
-<br> SCD (fixed attribute change) : if row changed so data goes to different table. <not common scenario>
+<br> SCD (fixed attribute change) : if row changed so data goes to different table. <not common scenario> so main table didnt change
 <br> SCD (inferred member) : late arriving data so fact can't match it in dim as not yet came                   
-<br> 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+<br> SCD (changing attribute ) :SCD type 1  (may there is historical data so if apply to history option is active will update all hist rows to last version)
+<br> SCD (historical attribute ) :SCD type 2 (need to show who is last row using A: start n end date B:status flag isACtive) so last date will be null means active 
+#### dealing with infered (late arrived dim rows)
+<br> when we select from fact and no mapping key in dim so it will be created with 2 options
+<br> 1: is to create it with all null columns 
+<br> 2: to add one more column to say if infered/not to avoid selecting nulls 
+<br> when this infered come it will update that row BTW we can create this all in SCD wizard : check demo in module 3
+<br> wizard didnt detect deletion in source system.
+#### ALTERNATIVE TO WIZARD
+<br> wizard dont support type SCD type 2  / don't detect deletion in source / very slow bbar <can be more faster if choosed fast load option : still bad>
+<br> so option2 1-load data to stage table 2-T-sql to laod data (merge) --> this option is fast as it use bulk (set) load 
+<br> merge : target -> target table
+<br> source -> source table
+<br> when matched -> table in both source and target
+<br> when not matched by target -> row in source but not in target
+<br> when not matched by source -> row in target but not in source 
+<br> check example in module 03 demo merge setul .txt <truncate stage then load data into it then merge <update if exist,insert if not>> TYPE 1 SCD exmple
+<br> **NOTE SCD is not on table level but column level so name-> type1 if change will overwrite row / status may be type 2 so if change we add new row **
 <br>
 <br>
 <br>
