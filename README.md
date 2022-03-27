@@ -155,7 +155,7 @@ when natural key in fact finds no map in dim so there is many options (3rd one i
 <br> CT is Sync but lightweight || keep only new data. || tell only pk that has been changed not column itself.
 <br> CDC can't track new column automatically but CT can DO
 <br> CT can't handle more than 15M change per day but CDC is stable.
-#### big dive into CDC 
+### big dive into CDC 
 <br> configrations: 
 <br> role_name -> roles that can make changes to CDC if null -> anyone can
 <br> capture instance -> name of change data table if not specified will get it from source name 
@@ -176,5 +176,8 @@ when natural key in fact finds no map in dim so there is many options (3rd one i
 <br> in CDC first incremental load after historical load will be dedicated to data changes during historical load.
 <br> CDC -> historical -> intial load , end intial load 
 <br> CDC -> inc -> get cdc key then set it at the end.
-<br> 
-<br>
+### big dive into CT
+<br> we here have only CT table pk so need to join with source to get data and insert to fact   
+<br> so here too we wanna get deleted data that exists only in Ct table so left join we use in etl 
+<br> move deleted data pk to util then delete it later 
+<br> so here deletion has separate path of ETL that need some handling. than updates , insert in incremental mode.
