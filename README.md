@@ -61,6 +61,7 @@
 <br> SCD (changing attribute ) :SCD type 1  (may there is historical data so if apply to history option is active will update all hist rows to last version)
 <br> SCD (historical attribute ) :SCD type 2 (need to show who is last row using A: start n end date B:status flag isACtive) so last date will be null means active 
 #### Late arriving Dim == infered dim
+** https://www.matillion.com/resources/blog/what-to-do-with-a-late-arriving-dimension-or-early-arriving-facts **
 when natural key in fact finds no map in dim so there is many options (3rd one in module 5 is best)
 <br> create incremental sur key and save natural key in dim and in temp table then if come late will he updated else its as is in dim.
 <br> when we select from fact and no mapping key in dim so it will be created with 2 options
